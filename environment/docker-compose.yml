@@ -1,0 +1,30 @@
+author:
+  build: docker/aem
+  environment:
+    - CQ_PORT=4502
+    - CQ_RUNMODE=author
+  ports:
+    - "4502:4502"
+  links:
+    - publish
+
+publish:
+  build: docker/aem
+  environment:
+    - CQ_PORT=4503
+    - CQ_RUNMODE=publish
+  ports:
+    - "4503:4503"
+
+dispatcher:
+  build: docker/aem-dispatcher
+  ports:
+    - "80:80"
+    - "443:443"
+  links:
+    - publish
+
+#  volumes:
+#   - .:/code
+#  links:
+#   - redis

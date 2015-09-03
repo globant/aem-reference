@@ -1,0 +1,52 @@
+// Default configuration
+license.file = "src/integration-test/resources/license.properties"
+
+aem.servers.with {
+  // AEM author instance where artifacts will be uploaded
+  author.with {
+    protocol = 'http'
+    machineName = 'localhost'
+    port = 4502
+    username = 'admin'
+    password = 'admin'
+    installPath = '/apps/install'
+    active = true
+  }
+  // AEM publisher instance where artifacts will be uploaded
+  publisher.with {
+    protocol = 'http'
+    machineName = 'localhost'
+    port = 4503
+    username = 'admin'
+    password = 'admin'
+    installPath = '/apps/install'
+    active = true
+  }
+
+  // AEM instance used to run integration tests
+  integration.with {
+    protocol = 'http'
+    machineName = 'localhost'
+    port =  4502
+    username = 'admin'
+    password = 'admin'
+    runmodes = 'author,nosamplecontent'
+    ready.path = '/libs/granite/core/content/login.html:QUICKSTART_HOMEPAGE'
+  }
+}
+
+// Environment specific overrides
+environments {
+  dev {
+    aem.servers.with {
+      def machineName = 'aem-reference'
+
+      author.machineName = machineName
+      publisher.machineName = machineName
+      integration.with {
+        machineName = machineName
+        url = "${->protocol}://${->machineName}:${->port}"
+      }
+    }
+  }
+}

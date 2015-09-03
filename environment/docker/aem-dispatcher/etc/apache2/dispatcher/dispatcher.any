@@ -1,0 +1,5 @@
+/name "dispatcher-server"
+/farms
+  {
+ 	$include "*.any.farm"
+  }

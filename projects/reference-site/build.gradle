@@ -1,0 +1,171 @@
+version = '1.0.0-SNAPSHOT'
+
+buildscript {
+  repositories {
+    jcenter()
+    maven {
+      url 'http://dl.bintray.com/twcable/aem'
+    }
+  }
+
+  dependencies {
+    classpath 'com.twcable.gradle:cq-gradle-plugins:3.0.2'  //https://github.com/TWCable/cq-gradle-plugin
+  }
+}
+
+repositories {
+  jcenter()
+  mavenLocal()
+  mavenCentral()
+  maven {
+    url 'http://repo.adobe.com/nexus/content/groups/public/'
+  }
+}
+
+apply plugin: 'java'
+apply from:   'src/gradle/integration-test.gradle'
+apply from:   'src/gradle/parse-config.gradle'
+apply plugin: 'scr'
+apply plugin: 'sling-bundle'
+apply plugin: 'cqpackage'
+apply plugin: 'eclipse'
+
+dependencies {
+  testCompile(
+    [group: 'junit', name: 'junit', version:'4.8.2'],
+    [group: 'org.mockito', name: 'mockito-all', version:'1.9.5'],
+    [group: 'junit-addons', name: 'junit-addons', version:'1.4']
+  )
+
+  compile(
+    /* This dependency was originally in the Maven provided scope, but the project was not of type war.
+    This behavior is not yet supported by Gradle, so this dependency has been converted to a compile dependency.
+    Please review and delete this closure when resolved. */
+
+    [group: 'org.apache.commons', name: 'commons-lang3', version:'3.0.1'],
+    [group:  'commons-collections', name: 'commons-collections', version:'3.2.1'],
+    [group:  'javax.inject', name: 'javax.inject', version:'1'],
+    [group:  'org.apache.felix', name: 'org.apache.felix.scr', version:'1.6.0'],
+    [group:  'org.apache.felix', name: 'org.apache.felix.scr.annotations', version:'1.9.6'],
+    [group:  'biz.aQute', name: 'bndlib', version:'1.50.0'],
+    [group:  'org.osgi', name: 'org.osgi.core', version:'4.2.0'],
+    [group:  'org.osgi', name: 'org.osgi.compendium', version:'4.2.0'],
+    [group:  'org.slf4j', name: 'slf4j-api', version:'1.5.11'],
+    [group:  'javax.jcr', name: 'jcr', version:'2.0'],
+    [group:  'javax.servlet', name: 'servlet-api', version:'2.4'],
+    [group:  'com.adobe.aem', name: 'aem-api', version:'6.0.0.1']
+  )
+
+  integrationTestCompile(
+    [group: 'org.apache.sling', name: 'org.apache.sling.commons.json', version:'2.0.6'],
+    [group: 'commons-io', name: 'commons-io', version:'1.4'],
+    [group: 'org.slf4j', name: 'slf4j-simple', version:'1.5.11'],
+    [group: 'junit', name: 'junit', version:'4.8.2']
+  )
+
+  integrationTestCompile(
+    /* This dependency was originally in the Maven provided scope, but the project was not of type war.
+     This behavior is not yet supported by Gradle, so this dependency has been converted to a integrationTestCompile dependency.
+     Please review and delete this closure when resolved. */
+
+    [group: 'org.apache.sling', name: 'org.apache.sling.junit.core', version:'1.0.8'],
+    [group: 'org.apache.sling', name: 'org.apache.sling.junit.scriptable', version:'1.0.8'],
+    [group: 'org.apache.sling', name: 'org.apache.sling.junit.remote', version:'1.0.8'],
+    [group: 'org.apache.sling', name: 'org.apache.sling.testing.tools', version:'1.0.8'],
+    [group: 'org.apache.sling', name: 'org.apache.sling.servlets.post', version:'2.3.4'],
+    [group: 'org.apache.httpcomponents', name: 'httpclient-osgi', version:'4.1.2'],
+    [group: 'org.apache.httpcomponents', name: 'httpcore-osgi', version:'4.1.2'],
+    [group: 'com.adobe.aem', name: 'aem-api', version:'6.0.0.1'],
+    [group: 'org.slf4j', name: 'slf4j-api', version:'1.5.11']
+  )
+
+  if (!cfg.aem?.servers?.integration?.url) { // required if integration tests are going to be run in a remote server
+    integrationTestRuntime group: 'com.adobe.aem', name: 'cq-quickstart', version:'6.0.0', classifier:'standalone'
+  }
+
+  //configurations.cq_package {
+  //exclude group: 'javax.servlet', module: 'servlet-api'
+  //}
+}
+
+jar {
+  manifest { // the manifest of the default jar is of type OsgiManifest
+    instruction 'Sling-Model-Packages', 'com.ninedemons.aemtesting.models'
+  }
+}
+
+project.convention.slingServers.with { // configure cqpackage plugin
+  def cfg = owner.cfg
+
+  def applyConfig = { a -> return {
+      protocol = a.protocol
+      port = a.port
+      machineName = a.machineName
+      username = a.username
+      password = a.password
+      installPath = a.installPath
+      active = a.active
+  }}
+  author.with applyConfig(cfg.aem.servers.author)
+  publisher.with applyConfig(cfg.aem.servers.publisher)
+}
+
+createPackage {
+  dependsOn assemble
+  addProjectBundles()
+}
+
+task copyAdditionalBundles(type: Copy) {
+  from jar
+
+  if (!cfg.aem?.servers?.integration?.url) {
+    from configurations.integrationTestRuntime // AEM container not needed if running against a specific environment
+  }
+
+  into "$buildDir/sling/additional-bundles"
+}
+
+task copyLicense(type: Copy) {
+  from cfg.license.file
+  into "$buildDir/cq-quickstart"
+}
+
+integrationTest {
+  dependsOn copyAdditionalBundles, copyLicense
+
+  onOutput { descriptor, event -> logger.lifecycle(event.message) }  // listen to standard out and standard error
+
+  def randomPort = AvailablePortFinder.createPrivate().nextAvailable
+
+  if (cfg.aem?.servers?.integration?.url) {
+    systemProperty 'test.server.url', cfg.aem.servers.integration.url.toString()
+  }
+
+  systemProperty 'test.server.username', cfg.aem.servers.integration.username
+  systemProperty 'test.server.password', cfg.aem.servers.integration.password
+  systemProperty 'jar.executor.server.port', randomPort
+  systemProperty 'jar.executor.jar.folder', "$buildDir/sling/additional-bundles"
+  systemProperty 'jar.executor.jar.name.regexp', 'cq-quickstart.*jar$'
+  systemProperty 'jar.executor.jar.options', "-p $randomPort -nobrowser -nofork -r $cfg.aem.servers.integration.runmodes"
+  systemProperty 'jar.executor.vm.options', '-XX:MaxPermSize=256m -Xmx1536M'
+  systemProperty 'jar.executor.work.folder', "$buildDir/cq-quickstart"
+
+  systemProperty 'server.ready.timeout.seconds', 6000
+  systemProperty 'sling.testing.timeout.multiplier', 1.0
+  systemProperty 'server.ready.path.1', "$cfg.aem.servers.integration.ready.path"
+  systemProperty 'start.bundles.timeout.seconds', 40
+  systemProperty 'bundle.install.timeout.seconds', 30
+
+  systemProperty 'additional.bundles.path',   "$buildDir/sling/additional-bundles"
+  systemProperty 'sling.additional.bundle.1', 'org.apache.sling.junit.core'
+  systemProperty 'sling.additional.bundle.2', 'org.apache.sling.junit.scriptable'
+  systemProperty 'sling.additional.bundle.3', 'org.apache.sling.junit.remote'
+  systemProperty 'sling.additional.bundle.4', 'org.apache.sling.testing.tools'
+  systemProperty 'sling.additional.bundle.5', 'httpclient-osgi'
+  systemProperty 'sling.additional.bundle.6', 'httpcore-osgi'
+  systemProperty 'sling.additional.bundle.7', jar.baseName
+}
+
+tasks.withType(Test) {
+  reports.html.destination = file("${reporting.baseDir}/${name}")
+}
