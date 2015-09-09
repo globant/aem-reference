@@ -10,6 +10,7 @@ buildscript {
 
   dependencies {
     classpath 'com.twcable.gradle:cq-gradle-plugins:3.0.2'  //https://github.com/TWCable/cq-gradle-plugin
+    classpath 'be.filipblondeel.gradle:gradle-gulp-plugin:0.1'
   }
 }
 
@@ -29,6 +30,7 @@ apply plugin: 'scr'
 apply plugin: 'sling-bundle'
 apply plugin: 'cqpackage'
 apply plugin: 'eclipse'
+apply plugin: 'gulp'
 
 dependencies {
   testCompile(
