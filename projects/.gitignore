@@ -15,7 +15,7 @@ build/
 .project
 .settings
 .classpath
-.gradle
+
 
 node_modules/
 reports/
