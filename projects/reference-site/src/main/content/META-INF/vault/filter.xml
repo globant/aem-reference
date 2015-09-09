@@ -5,4 +5,7 @@
 	</filter>
 	<filter root="/apps/sling" />
     <filter root="/etc/designs/aemtesting"/>
+
+    <filter root="/apps/dam"/>
+    <filter root="/etc/designs/reference-site"/>
 </workspaceFilter>
