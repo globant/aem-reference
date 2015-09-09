@@ -1,0 +1,4 @@
+#base=js
+AssetEditor.js
+widgets/smartimage4croppings.js
+

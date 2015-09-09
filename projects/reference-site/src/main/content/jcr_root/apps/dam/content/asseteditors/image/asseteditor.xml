@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+        jcr:primaryType="cq:Widget"
+        jcr:title="Image Asset Editor"
+        sling:resourceType="cq/ui/components/widget"
+        scene7="{Boolean}false"
+        scene7Type="image"
+        xtype="ref_site_asseteditor">
+    </jcr:root>
