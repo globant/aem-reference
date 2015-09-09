@@ -1,6 +1,6 @@
-var NGS = NGS || {};
+var AEM_REFSITE = AEM_REFSITE || {};
 
-NGS.SmartImage4Croppings = CQ.Ext.extend(CQ.html5.form.SmartImage, {
+AEM_REFSITE.SmartImage4Croppings = CQ.Ext.extend(CQ.html5.form.SmartImage, {
     crops: {},
 
     constructor: function (config) {
@@ -29,11 +29,11 @@ NGS.SmartImage4Croppings = CQ.Ext.extend(CQ.html5.form.SmartImage, {
         var defaults = { "cropConfig": { "aspectRatios": aRatios } };
         config = CQ.Util.applyDefaults(config, defaults);
 
-        NGS.SmartImage4Croppings.superclass.constructor.call(this, config);
+        AEM_REFSITE.SmartImage4Croppings.superclass.constructor.call(this, config);
     },
 
     initComponent: function () {
-        NGS.SmartImage4Croppings.superclass.initComponent.call(this);
+        AEM_REFSITE.SmartImage4Croppings.superclass.initComponent.call(this);
 
         var imgTools = this.imageToolDefs;
         var cropTool;
@@ -185,4 +185,4 @@ NGS.SmartImage4Croppings = CQ.Ext.extend(CQ.html5.form.SmartImage, {
     }
 });
  
-CQ.Ext.reg("smartimage4croppings", NGS.SmartImage4Croppings);
+CQ.Ext.reg("smartimage4croppings", AEM_REFSITE.SmartImage4Croppings);
