@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "gulp-nightwatch": "^0.2.4",
+    "selenium-standalone": "^4.6.0"
+  },
+  "dependencies": {
+    "gulp": "^3.9.0"
+  }
+}
