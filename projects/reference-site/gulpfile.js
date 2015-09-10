@@ -8,7 +8,6 @@ function errorLog(error){
 }
 
 gulp.task('selenium-connect', function (done) {
-
   selenium.install({
     logger: function (message) { }
   }, function (err) {
@@ -23,17 +22,14 @@ gulp.task('selenium-connect', function (done) {
 
 });
 
-gulp.task('tests', ['selenium-connect'], function() {
-
+gulp.task('run-nightwatch', ['selenium-connect'], function() {
   return gulp.src('')
     .pipe(nightwatch())
     .on('error', errorLog);
 });
 
-gulp.task('functional-tests', ['tests'], function () {
-
+gulp.task('functional-test', ['run-nightwatch'], function () {
   selenium.child.kill();
-
 });
 
 

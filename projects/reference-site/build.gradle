@@ -173,3 +173,16 @@ integrationTest {
 tasks.withType(Test) {
   reports.html.destination = file("${reporting.baseDir}/${name}")
 }
+
+task functionalTest {
+  group = 'Verification'
+  description 'Runs the functional tests.'
+  if (project.hasProperty('integrationTest')) {
+    mustRunAfter integrationTest
+  } else {
+    shouldRunAfter test
+  }
+  dependsOn "nodeSetup", "npmInstall", "gulp_functional-test"
+}
+check.dependsOn functionalTest
+
