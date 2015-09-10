@@ -2,4 +2,4 @@ build.local.gradle
 license.properties
 
 node_modules/
-functional-tests-reports/
+functional-test-reports/
