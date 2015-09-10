@@ -1,0 +1,5 @@
+apply plugin: com.globant.aem.archetype.AemArchetypePlugin
+
+aemarchetype {
+  src = 'templates/aem-module'
+}

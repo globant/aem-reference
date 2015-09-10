@@ -1,0 +1,8 @@
+apply plugin: 'groovy'
+
+group = 'com.globant.aem.archetype'
+
+dependencies {
+   compile gradleApi()
+//   groovy localGroovy()
+}
