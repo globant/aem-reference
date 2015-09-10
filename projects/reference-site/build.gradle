@@ -141,6 +141,8 @@ integrationTest {
     systemProperty 'test.server.url', cfg.aem.servers.integration.url.toString()
   }
 
+  file("$buildDir/cq-quickstart").mkdirs()  // Create jar.executor.work.folder
+
   systemProperty 'test.server.username', cfg.aem.servers.integration.username
   systemProperty 'test.server.password', cfg.aem.servers.integration.password
   systemProperty 'jar.executor.server.port', randomPort
