@@ -168,17 +168,6 @@ public class AdaptiveImageServlet extends AbstractImageServlet {
                 }
             }
 
-            if (croppingId == null) {
-                // FIXME: REMOVE THE CODE BELLOW ADDED TO PROVIDE BACKWARDS
-                // COMPATIBILITY WITH SQRCROP SELECTOR AFTER NEXT DEPLOYMENT
-                if (temp.equals("sqrcrop:")) {
-                    croppingId = "sqrcrop:4:3";
-                } else {
-                    response.sendError(HttpServletResponse.SC_NOT_FOUND);
-                    return;
-                }
-            }
-
             Resource croppingResource = resource.getChild("jcr:content/croppings/" + selectors[3].toLowerCase());
             if (croppingResource != null) {
                 ValueMap croppingRect = croppingResource.adaptTo(ValueMap.class);
