@@ -1,0 +1,21 @@
+apply plugin: 'gulp'
+
+node {
+  version = '0.12.0'  // Version of node to use.
+  download = true     // Enabled the automatic download.
+}
+
+project.getProperty('gulp_functional-test').dependsOn(npmInstall)
+
+task functionalTest  {
+  group = 'Verification'
+  description = 'Runs the functional tests.'
+  if (project.hasProperty('integrationTest')) {
+    mustRunAfter integrationTest
+  } else {
+    shouldRunAfter test
+  }
+  dependsOn  'gulp_functional-test'
+}
+
+check.dependsOn functionalTest
