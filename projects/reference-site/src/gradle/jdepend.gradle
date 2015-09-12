@@ -1,0 +1,5 @@
+apply plugin: 'jdepend'
+
+jdepend {
+  toolVersion = '2.9.1'
+}

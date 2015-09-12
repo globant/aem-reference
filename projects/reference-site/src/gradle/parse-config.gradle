@@ -1,8 +1,11 @@
 def env = hasProperty('env')? getProperty('env') : null
 
-def globalConfig = new ConfigSlurper(env).parse(file("$projectDir/build.config.gradle").toURL())
-if (file("./src/res/values/specialfile.txt").exists()) { 
-  def localConfig = new ConfigSlurper(env).parse(file("$projectDir/build.local.gradle").toURL())
+def localConfigFile = file("$projectDir/build.local.gradle")
+def globalConfigFile = file("$projectDir/build.config.gradle")
+
+def globalConfig = new ConfigSlurper(env).parse(globalConfigFile.toURL())
+if (localConfigFile.exists()) { 
+  def localConfig = new ConfigSlurper(env).parse(localConfigFile.toURL())
   globalConfig.merge(localConfig)
 }
 
