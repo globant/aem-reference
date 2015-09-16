@@ -1,2 +1,4 @@
 AEM_6.0_Quickstart.jar
+AEM_6.1_Quickstart.jar
 license.properties
+!bin/

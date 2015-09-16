@@ -1,28 +1,60 @@
+dnsdock:
+  # Setting up a dns container to resolve circular linking dependencies
+  # Need to use version v1.10.0 unil this issue is solved : https://github.com/tonistiigi/dnsdock/issues/34
+  # environment:
+  #  - DNSDOCK_NAME=publish
+  #  - DNSDOCK_IMAGE=aem
+  # matches publish.aem.docker
+  image: tonistiigi/dnsdock:v1.10.0
+  volumes:
+    - /var/run/docker.sock:/run/docker.sock
+  ports:
+    - 172.17.42.1:53:53/udp
+
 author:
   build: docker/aem
   environment:
     - CQ_PORT=4502
     - CQ_RUNMODE=author
+    - DNSDOCK_NAME=author
+    - DNSDOCK_IMAGE=aem
   ports:
     - "4502:4502"
-  links:
-    - publish
+  dns: 172.17.42.1
 
 publish:
   build: docker/aem
   environment:
     - CQ_PORT=4503
     - CQ_RUNMODE=publish
+    - DNSDOCK_NAME=publish
+    - DNSDOCK_IMAGE=aem
   ports:
     - "4503:4503"
+  dns: 172.17.42.1
 
 dispatcher:
   build: docker/aem-dispatcher
+  environment:
+    - DNSDOCK_NAME=dispatcher
+    - DNSDOCK_IMAGE=aem
   ports:
     - "80:80"
     - "443:443"
   links:
+    # Even though we're setting up the DNS, linking the publish container is required.
+    # The dispatcher fails to start if the publish container is not ready.
     - publish
+  dns: 172.17.42.1
+
+
+#proxy:
+#  # Using ambassador pattern to solve circular linking dependencies
+#  # @see: https://github.com/cpuguy83/docker-grand-ambassador
+#  image: cpuguy83/docker-grand-ambassador
+#  volumes:
+#    - "/var/run/docker.sock:/var/run/docker.sock"
+#  command: "-name aem_publish_1 -name aem_dispatcher_1"
 
 #  volumes:
 #   - .:/code

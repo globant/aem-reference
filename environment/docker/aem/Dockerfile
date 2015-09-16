@@ -5,11 +5,11 @@ RUN mkdir -p /opt/aem
 RUN mkdir -p /opt/aem/crx-quickstart/install
 
 WORKDIR /opt/aem
-ADD AEM_6.1_Quickstart.jar AEM_6.1_Quickstart.jar
-ADD license.properties license.properties
-ADD crx-quickstart/bin/docker-start crx-quickstart/bin/docker-start
+ADD files/6.1/AEM_6.1_Quickstart.jar AEM_6.1_Quickstart.jar
+ADD files/6.1/license.properties license.properties
+ADD files/6.1/hotfix/* /opt/aem/crx-quickstart/install/
+ADD files/crx-quickstart/bin/docker-start crx-quickstart/bin/docker-start
 ##ADD aemInstaller.py
-#ADD hotfix/* /opt/aem/crx-quickstart/install/
 
 # Install AEM
 RUN java -jar AEM_6.1_Quickstart.jar -unpack

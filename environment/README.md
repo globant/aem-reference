@@ -9,8 +9,8 @@ In OSX or Windows environments, you can use [Vagrant](http://docs.vagrantup.com/
 the Docker Machine (formerly Boot2Docker) provided by Docker for non-linux environments.
 
 Once you have decided whether to use Vagrant or standalone Docker:
-1. Put a copy of your AEM quikstart jar in the directory: docker/aem/AEM_6.1_Quickstart.jar
-2. Put a copy of your license file in the directory: docker/aem/license.properties
+1. Put a copy of your AEM quikstart jar in the directory: docker/aem/files/6.1/AEM_6.1_Quickstart.jar
+2. Put a copy of your license file in the directory: docker/aem/files/6.1/license.properties
 3. Follow the steps related to Vagrant or standalone Docker set up
 
 ## Vagrant set up
