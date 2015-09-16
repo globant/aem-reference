@@ -19,7 +19,7 @@ allprojects {
 ```
 NOTE: Alternative, if you have maven already installed you can install AEM quickstart JAR in your local repository:
 ```
-$ mvn install:install-file -DgroupId=com.adobe.aem -DartifactId=cq-quickstart -Dversion=6.1.0 -Dclassifier=standalonei -Dpackaging=jar -Dfile=<your_quickstart_jar>
+$ mvn install:install-file -DgroupId=com.adobe.aem -DartifactId=cq-quickstart -Dversion=6.1.0 -Dclassifier=standalone -Dpackaging=jar -Dfile=<your_quickstart_jar>
 ```
 
 # Useful gradle tasks
