@@ -37,6 +37,10 @@ task copyAdditionalBundles(type: Copy) {
 task copyLicense(type: Copy) {
   from cfg.license.file
   into "$buildDir/aem"
+
+  if (!file(cfg.license.file).exists()) {
+    throw new GradleScriptException("License file not found: $cfg.license.file.Please review your configuration files and ensure property 'license.file' points to an existing file.", null)
+  }
 }
 
 integrationTest {
@@ -50,7 +54,9 @@ integrationTest {
     systemProperty 'test.server.url', cfg.aem.servers.integration.url.toString()
   }
 
-  file("$buildDir/aem").mkdirs()  // Create jar.executor.work.folder
+  doFirst {
+    file("$buildDir/aem").mkdirs()  // Create jar.executor.work.folder
+  }
 
   systemProperty 'test.server.username', cfg.aem.servers.integration.username
   systemProperty 'test.server.password', cfg.aem.servers.integration.password
