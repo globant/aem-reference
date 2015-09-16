@@ -85,6 +85,6 @@ integrationTest {
 
 dependencies {
   if (!cfg.aem?.servers?.integration?.url) { // required if integration tests are going to be run in a remote server
-    integrationTestRuntime group: 'com.adobe.aem', name: 'cq-quickstart', version:'6.0.0', classifier:'standalone'
+    integrationTestRuntime group: 'com.adobe.aem', name: 'cq-quickstart', version:'6.1.0', classifier:'standalone'
   }
 }

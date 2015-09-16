@@ -26,7 +26,7 @@ RUN \
 # ln -s /opt/aem/dispatcher/dispatcher-apache2.2-4.1.10.so /usr/lib/apache2/modules/mod_dispatcher.so
 
 # Add config files
-ADD etc/apache2 /etc/apache2
+ADD files/etc/apache2 /etc/apache2
 
 # Enable dispatcher module
 RUN a2enmod aem_dispatcher
