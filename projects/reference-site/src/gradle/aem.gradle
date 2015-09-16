@@ -1,0 +1,90 @@
+apply plugin: 'java'
+apply plugin: com.globant.gradle.plugin.test.java.integration.IntegrationTestPlugin
+apply plugin: 'scr'
+apply plugin: 'sling-bundle'
+apply plugin: 'cqpackage'                     //https://github.com/TWCable/cq-gradle-plugin
+apply from:   'src/gradle/pmd.gradle'
+apply from:   'src/gradle/checkstyle.gradle'
+apply from:   'src/gradle/findbugs.gradle'
+apply from:   'src/gradle/jdepend.gradle'
+
+project.convention.slingServers.with { // configure cqpackage plugin
+  def cfg = owner.cfg
+
+  def applyConfig = { a -> return {
+      protocol = a.protocol
+      port = a.port
+      machineName = a.machineName
+      username = a.username
+      password = a.password
+      installPath = a.installPath
+      active = a.active
+  }}
+  author.with applyConfig(cfg.aem.servers.author)
+  publisher.with applyConfig(cfg.aem.servers.publisher)
+}
+
+task copyAdditionalBundles(type: Copy) {
+  from jar
+
+  if (!cfg.aem?.servers?.integration?.url) {
+    from configurations.integrationTestRuntime // AEM container not needed if running against a specific environment
+  }
+
+  into "$buildDir/sling/additional-bundles"
+}
+
+task copyLicense(type: Copy) {
+  from cfg.license.file
+  into "$buildDir/aem"
+
+  if (!file(cfg.license.file).exists()) {
+    throw new GradleScriptException("License file not found: $cfg.license.file.Please review your configuration files and ensure property 'license.file' points to an existing file.", null)
+  }
+}
+
+integrationTest {
+  dependsOn copyAdditionalBundles, copyLicense
+
+  onOutput { descriptor, event -> logger.lifecycle(event.message) }  // listen to standard out and standard error
+
+  def randomPort = AvailablePortFinder.createPrivate().nextAvailable
+
+  if (cfg.aem?.servers?.integration?.url) {
+    systemProperty 'test.server.url', cfg.aem.servers.integration.url.toString()
+  }
+
+  doFirst {
+    file("$buildDir/aem").mkdirs()  // Create jar.executor.work.folder
+  }
+
+  systemProperty 'test.server.username', cfg.aem.servers.integration.username
+  systemProperty 'test.server.password', cfg.aem.servers.integration.password
+  systemProperty 'jar.executor.server.port', randomPort
+  systemProperty 'jar.executor.jar.folder', "$buildDir/sling/additional-bundles"
+  systemProperty 'jar.executor.jar.name.regexp', 'cq-quickstart.*jar$'
+  systemProperty 'jar.executor.jar.options', "-p $randomPort -nobrowser -nofork -r $cfg.aem.servers.integration.runmodes"
+  systemProperty 'jar.executor.vm.options', '-XX:MaxPermSize=256m -Xmx1536M'
+  systemProperty 'jar.executor.work.folder', "$buildDir/aem"
+
+  systemProperty 'server.ready.timeout.seconds', 6000
+  systemProperty 'sling.testing.timeout.multiplier', 1.0
+  systemProperty 'server.ready.path.1', "$cfg.aem.servers.integration.ready.path"
+  systemProperty 'start.bundles.timeout.seconds', 40
+  systemProperty 'bundle.install.timeout.seconds', 30
+
+  systemProperty 'additional.bundles.path',   "$buildDir/sling/additional-bundles"
+  systemProperty 'sling.additional.bundle.1', 'org.apache.sling.junit.core'
+  systemProperty 'sling.additional.bundle.2', 'org.apache.sling.junit.scriptable'
+  systemProperty 'sling.additional.bundle.3', 'org.apache.sling.junit.remote'
+  systemProperty 'sling.additional.bundle.4', 'org.apache.sling.testing.tools'
+  systemProperty 'sling.additional.bundle.5', 'httpclient-osgi'
+  systemProperty 'sling.additional.bundle.6', 'httpcore-osgi'
+  systemProperty 'sling.additional.bundle.7', jar.baseName
+}
+
+dependencies {
+  if (!cfg.aem?.servers?.integration?.url) { // required if integration tests are going to be run in a remote server
+    integrationTestRuntime group: 'com.adobe.aem', name: 'cq-quickstart', version:'6.0.0', classifier:'standalone'
+  }
+}

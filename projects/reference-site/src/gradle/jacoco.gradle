@@ -1,0 +1,118 @@
+apply plugin: 'jacoco'
+
+ext {
+  coverageThresholds = [
+    'instruction': 93,
+    'branch'     : 88,
+    'line'       : 91,
+    'complexity' : 84,
+    'method'     : 87,
+    'class'      : 100
+    ]
+}
+
+project.tasks.withType(Test).all { task ->
+  def reportTaskName = "jacoco${task.name.capitalize()}Report"
+  if (task.name != JavaPlugin.TEST_TASK_NAME && !project.tasks.find { task.name == reportTaskName }) {
+    // jacocoTestReport is added automatically by the jacoco plugin, we need to avoid adding it twice
+    JacocoReport reportTask = project.tasks.create(reportTaskName, JacocoReport)
+    reportTask.executionData task
+    reportTask.sourceSets(project.sourceSets.main)
+    reportTask.conventionMapping.with {
+      reportTask.reports.all { report ->
+        report.conventionMapping.with {
+          enabled = { true }
+          destination = { new File(project.jacoco.reportsDir, "${task.name}/${report.name}") }
+        }
+      }
+    }
+  }
+}
+
+
+task aggregateJacocoExecutions(type: JacocoMerge) {
+  destinationFile = file("$buildDir/jacoco/aggregated.exec")
+
+  executionData = files()
+  tasks.withType(JacocoReport).each { executionData += it.executionData }
+
+  doFirst {
+    executionData = files(executionData.findAll { it.exists() })
+  }
+}
+
+task jacocoAggregatedReport(type: JacocoReport) {
+  dependsOn aggregateJacocoExecutions
+  executionData = files(aggregateJacocoExecutions.destinationFile)
+  sourceSets sourceSets.main
+
+  reports {
+    html {
+      enabled = true
+      destination = "$jacoco.reportsDir/aggregated"
+    }
+    xml {
+      enabled = true
+      destination = "$jacoco.reportsDir/aggregated/aggregated.xml"
+    }
+  }
+}
+
+task coverageCheck(description: 'Checks code coverage.', group: 'Verification') {
+  dependsOn jacocoAggregatedReport
+  mustRunAfter tasks.withType(Test)
+
+  doLast {
+    def report = jacocoAggregatedReport.reports.xml.destination
+
+    logger.lifecycle("Checking coverage results: ${report}")
+
+    def parser = new XmlParser()
+    parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+    parser.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false)
+    def results = parser.parse(report)
+
+    def percentage = {
+      def covered = it.'@covered' as Double
+      def missed = it.'@missed' as Double
+      ((covered / (covered + missed)) * 100).round(2)
+    }
+
+    def counters = results.counter
+    def metrics = [:]
+    metrics << [
+      'instruction': percentage(counters.find { it.'@type'.equals('INSTRUCTION') }),
+      'branch'     : percentage(counters.find { it.'@type'.equals('BRANCH') }),
+      'line'       : percentage(counters.find { it.'@type'.equals('LINE') }),
+      'complexity' : percentage(counters.find { it.'@type'.equals('COMPLEXITY') }),
+      'method'     : percentage(counters.find { it.'@type'.equals('METHOD') }),
+      'class'      : percentage(counters.find { it.'@type'.equals('CLASS') })
+    ]
+
+
+    def failures = []
+    metrics.each {
+      def limit = coverageThresholds[it.key]
+      if (it.value < limit) {
+        failures.add("- ${it.key} coverage rate is: ${it.value}%, minimum is ${limit}%")
+      }
+    }
+
+    if (failures) {
+      logger.quiet("------------------ Code Coverage Failed -----------------------")
+      failures.each {
+        logger.quiet(it)
+      }
+      logger.quiet("---------------------------------------------------------------")
+      throw new GradleException("Code coverage failed")
+    } else{
+      logger.quiet("Passed Code Coverage Checks")
+    }
+  }
+}
+check.dependsOn coverageCheck
+
+tasks.withType(JacocoReport).each {
+  it.description = "Creates ${it.name-'jacoco'-'Report'} coverage report"
+  it.group = 'Reporting'
+}
