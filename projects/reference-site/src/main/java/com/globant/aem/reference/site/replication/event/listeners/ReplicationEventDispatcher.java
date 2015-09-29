@@ -28,17 +28,17 @@ import com.globant.aem.reference.site.replication.services.ReplicationCommand;
  * logs a message.
  */
 @Component(
-  metatype = false, 
+  metatype = false,
   immediate = true,
   description = "Handles com/day/cq/replication events by delegating to accepting instances of "
               + "com.globant.aem.reference.site.replication.services.ReplicationCommand"
 )
 @Service(value = { EventHandler.class })
 @Property(name = "event.topics", value = { ReplicationAction.EVENT_TOPIC })
-@References({ 
+@References({
   @Reference(
-    cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, 
-    policy = ReferencePolicy.DYNAMIC, 
+    cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
+    policy = ReferencePolicy.DYNAMIC,
     referenceInterface = ReplicationCommand.class,
     bind = "bindReplicationCommand",
     unbind = "unbindReplicationCommand")
@@ -56,15 +56,15 @@ public class ReplicationEventDispatcher implements EventHandler {
 
 		if(action != null) {
 		  String path = action.getPath();
-		  try {     
+		  try {
         Resource resource = this.resolve(path);
-      
+
         for(ReplicationCommand command: this.commands) {
           if (command.accepts(resource)) {
             command.execute(action, resource);
           }
         }
-        
+
       } catch (LoginException e) {
         log.error("Exception found when trying to access resource {}. Skipping resource.", path, e);
       }
@@ -81,20 +81,20 @@ public class ReplicationEventDispatcher implements EventHandler {
   }
 
   protected void bindReplicationCommand(
-      ReplicationCommand ref, 
+      ReplicationCommand ref,
       @SuppressWarnings("rawtypes") Map properties) {
-    
+
     log.info("Binding {}", ref.getClass().getName());
 
     commands.add(ref);
   }
-  
+
   protected void unbindReplicationCommand(
-      ReplicationCommand myService, 
+      ReplicationCommand myService,
       @SuppressWarnings("rawtypes") Map properties) {
-    
+
     log.info("Unbinding {}", myService.getClass().getName());
 
     commands.remove(myService);
-  }  
+  }
 }

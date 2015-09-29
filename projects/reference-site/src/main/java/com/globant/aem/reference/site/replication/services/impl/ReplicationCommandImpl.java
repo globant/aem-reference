@@ -28,20 +28,20 @@ import com.globant.aem.reference.site.replication.services.ReplicationCommand;
 import com.globant.aem.reference.site.replication.services.ReplicationHandlerService;
 
 @Component(
-  immediate = true, 
+  immediate = true,
   metatype = true,
   label = "Replication Commands",
   description = "Handles replication events for the configured paths by dispatching the appropiate "
               + "method invocation of registered "
               + "com.globant.aem.reference.site.replication.services.ReplicationHandlerService.",
   configurationFactory = true,
-  policy = ConfigurationPolicy.REQUIRE  
+  policy = ConfigurationPolicy.REQUIRE
 )
 @Service(value = ReplicationCommand.class)
 @References({
   @Reference(
-    cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, 
-    policy = ReferencePolicy.DYNAMIC, 
+    cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
+    policy = ReferencePolicy.DYNAMIC,
     referenceInterface = ReplicationHandlerService.class,
     bind = "bindReplicationHandlerService",
     unbind = "unbindReplicationHandlerService")
@@ -68,7 +68,7 @@ public class ReplicationCommandImpl implements ReplicationCommand {
     unbounded = PropertyUnbounded.ARRAY)
   private List<String> handlerPids;
 
-  private Map<String, ReplicationHandlerService> handlersMap = 
+  private Map<String, ReplicationHandlerService> handlersMap =
       new HashMap<String, ReplicationHandlerService>();
 
   public ReplicationCommandImpl() {
@@ -97,7 +97,7 @@ public class ReplicationCommandImpl implements ReplicationCommand {
   protected void configure(
     final BundleContext bundleContext,
     final Map<String, Object> properties) {
-    
+
     String[] handlersArray = PropertiesUtil.toStringArray(properties.get(HANDLER_PIDS));
 
     pattern = PropertiesUtil.toString(properties.get(PATTERN), "");
@@ -110,7 +110,7 @@ public class ReplicationCommandImpl implements ReplicationCommand {
       log.debug("Skipping resource. {} does not match {}", resource.getPath(), pattern);
       return;
     }
-    
+
     for(String handlerPid: handlerPids) {
       ReplicationHandlerService handler = handlersMap.get(handlerPid);
 
@@ -133,9 +133,9 @@ public class ReplicationCommandImpl implements ReplicationCommand {
   }
 
   protected void bindReplicationHandlerService(
-      ReplicationHandlerService ref, 
+      ReplicationHandlerService ref,
       @SuppressWarnings("rawtypes") Map properties) {
-    
+
     String pid = (String) properties.get("service.pid");
 
     log.info("Binding replication handler {}", pid);
@@ -144,13 +144,13 @@ public class ReplicationCommandImpl implements ReplicationCommand {
   }
 
   protected void unbindReplicationHandlerService(
-      ReplicationHandlerService myService, 
+      ReplicationHandlerService myService,
       @SuppressWarnings("rawtypes") Map properties) {
 
     String pid = (String) properties.get("service.pid");
 
     log.info("Unbinding replication handler {}", pid);
-    
+
     handlersMap.remove(pid);
   }
 }
