@@ -1,1 +1,1 @@
-include 'projects/reference-site'
+include 'projects:reference-site'
