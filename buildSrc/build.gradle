@@ -2,7 +2,14 @@ apply plugin: 'groovy'
 
 group = 'com.globant.aem.archetype'
 
+repositories {
+  jcenter()
+  maven {
+    url 'http://dl.bintray.com/twcable/aem'                   // required by OsgiIntegrationTestPlugin
+  }
+}
 dependencies {
    compile gradleApi()
 //   groovy localGroovy()
+   compile 'com.twcable.gradle:cq-gradle-plugins:3.0.2'      // required by OsgiIntegrationTestPlugin
 }

@@ -1,5 +1,6 @@
 apply plugin: 'java'
 apply plugin: com.globant.gradle.plugin.test.java.integration.IntegrationTestPlugin
+apply plugin: com.globant.gradle.plugin.test.osgi.integration.OsgiIntegrationTestPlugin
 apply plugin: 'scr'
 apply plugin: 'sling-bundle'
 apply plugin: 'cqpackage'                     //https://github.com/TWCable/cq-gradle-plugin
@@ -26,6 +27,7 @@ project.convention.slingServers.with { // configure cqpackage plugin
 
 task copyAdditionalBundles(type: Copy) {
   from jar
+  from jarIntegrationTest
 
   if (!cfg.aem?.servers?.integration?.url) {
     from configurations.integrationTestRuntime // AEM container not needed if running against a specific environment
@@ -39,7 +41,10 @@ task copyLicense(type: Copy) {
   into "$buildDir/aem"
 
   if (!file(cfg.license.file).exists()) {
-    throw new GradleScriptException("License file not found: $cfg.license.file.Please review your configuration files and ensure property 'license.file' points to an existing file.", null)
+    def msg = """\
+      License file not found: ${cfg.license.file}.
+      Please review your configuration files and ensure property 'license.file' points to an existing file."""
+    throw new GradleScriptException(msg, null)
   }
 }
 
@@ -81,6 +86,7 @@ integrationTest {
   systemProperty 'sling.additional.bundle.5', 'httpclient-osgi'
   systemProperty 'sling.additional.bundle.6', 'httpcore-osgi'
   systemProperty 'sling.additional.bundle.7', jar.baseName
+  systemProperty 'sling.additional.bundle.8', jarIntegrationTest.baseName
 }
 
 dependencies {

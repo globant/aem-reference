@@ -4,6 +4,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.plugins.ide.eclipse.EclipsePlugin
 
 class IntegrationTestPlugin implements Plugin<Project> {
   void apply(Project project) {
@@ -29,6 +30,10 @@ class IntegrationTestPlugin implements Plugin<Project> {
     project.configurations {
       integrationTestCompile.extendsFrom testCompile
       integrationTestRuntime.extendsFrom testRuntime
+    }
+
+    if (project.plugins.hasPlugin(EclipsePlugin.class)) {
+      project.eclipse.classpath.plusConfigurations += [ project.configurations.integrationTestRuntime ]
     }
 
     project.with {
