@@ -23,11 +23,11 @@ repositories {
   }
 }
 
+apply plugin: 'eclipse'
 apply from:   'src/gradle/parse-config.gradle'
 apply from:   'src/gradle/aem.gradle'
 apply from:   'src/gradle/functional-test.gradle'
 apply from:   'src/gradle/jacoco.gradle'
-apply plugin: 'eclipse'
 
 dependencies {
   testCompile(
@@ -85,7 +85,8 @@ dependencies {
 
 jar {
   manifest { // the manifest of the default jar is of type OsgiManifest
-    instruction 'Sling-Model-Packages', 'com.ninedemons.aemtesting.models'
+//    instruction 'Sling-Model-Packages', 'com.ninedemons.aemtesting.models'
+//    instruction 'Bundle-Activator', 'com.globant.aem.reference.site.osgi.BundleActivator'
   }
 }
 
