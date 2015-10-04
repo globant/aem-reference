@@ -33,15 +33,18 @@ class OsgiIntegrationTestPlugin implements Plugin<Project> {
       group = 'Build'
       description = 'Assembles an osgi bundle containing the integrationTest classes.' 
       baseName = "${project.jar.baseName}-it"
-      def osgiConvention = new OsgiPluginConvention(project)
-      manifest = osgiConvention.osgiManifest {
-        name = baseName
-        symbolicName = baseName
+      def input = project.file("$project.buildDir/classes/integrationTest")
+      if (input.exists()) {
+        def osgiConvention = new OsgiPluginConvention(project)
+        manifest = osgiConvention.osgiManifest {
+          name = baseName
+          symbolicName = baseName
 
-        classesDir = project.sourceSets.integrationTest.output.classesDir
-        classpath = project.sourceSets.integrationTest.runtimeClasspath
+          classesDir = project.sourceSets.integrationTest.output.classesDir
+          classpath = project.sourceSets.integrationTest.runtimeClasspath
+        }
       }
-      from project.compileIntegrationTestJava.outputs.files.files.collect { project.fileTree(it) }
+      from project.fileTree(input)
     }
   }
 
