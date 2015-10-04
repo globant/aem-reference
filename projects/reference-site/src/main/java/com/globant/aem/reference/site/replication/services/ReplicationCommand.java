@@ -6,5 +6,6 @@ import com.day.cq.replication.ReplicationAction;
 
 public interface ReplicationCommand {
   boolean accepts(Resource resource);
+  
   void execute(ReplicationAction action, Resource resource);
 }

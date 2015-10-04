@@ -35,8 +35,7 @@ import com.globant.aem.reference.site.replication.services.ReplicationHandlerSer
               + "method invocation of registered "
               + "com.globant.aem.reference.site.replication.services.ReplicationHandlerService.",
   configurationFactory = true,
-  policy = ConfigurationPolicy.REQUIRE
-)
+  policy = ConfigurationPolicy.REQUIRE)
 @Service(value = ReplicationCommand.class)
 @References({
   @Reference(
@@ -44,8 +43,7 @@ import com.globant.aem.reference.site.replication.services.ReplicationHandlerSer
     policy = ReferencePolicy.DYNAMIC,
     referenceInterface = ReplicationHandlerService.class,
     bind = "bindReplicationHandlerService",
-    unbind = "unbindReplicationHandlerService")
-})
+    unbind = "unbindReplicationHandlerService")})
 public class ReplicationCommandImpl implements ReplicationCommand {
   private static final String PATTERN = "pattern";
   private static final String HANDLER_PIDS = "handlers.pids";
@@ -101,7 +99,7 @@ public class ReplicationCommandImpl implements ReplicationCommand {
     String[] handlersArray = PropertiesUtil.toStringArray(properties.get(HANDLER_PIDS));
 
     pattern = PropertiesUtil.toString(properties.get(PATTERN), "");
-    handlerPids = Arrays.asList(handlersArray != null? handlersArray : new String[] {});
+    handlerPids = Arrays.asList(handlersArray != null ? handlersArray : new String[] {});
   }
 
   @Override
@@ -111,22 +109,30 @@ public class ReplicationCommandImpl implements ReplicationCommand {
       return;
     }
 
-    for(String handlerPid: handlerPids) {
+    for (String handlerPid: handlerPids) {
       ReplicationHandlerService handler = handlersMap.get(handlerPid);
 
       if (handler != null) {
-        switch(action.getType()) {
-          case ACTIVATE:      handler.activateResource(resource);     break;
-          case DEACTIVATE:    handler.deactivateResource(resource);   break;
-          case DELETE:        handler.deleteResource(resource);       break;
-          case TEST:          handler.testResource(resource);         break;
-          case REVERSE:       handler.reverseResource(resource);      break;
-          case INTERNAL_POLL: handler.internalPollResource(resource); break;
-        }
+        dispatchAction(action, resource, handler);
       }
     }
   }
 
+  private void dispatchAction(
+      ReplicationAction action, Resource resource, ReplicationHandlerService handler) {
+    switch (action.getType()) {
+    //checkstyle:OneStatementPerLine OFF
+      case ACTIVATE:      handler.activateResource(resource);     break;
+      case DEACTIVATE:    handler.deactivateResource(resource);   break;
+      case DELETE:        handler.deleteResource(resource);       break;
+      case TEST:          handler.testResource(resource);         break;
+      case REVERSE:       handler.reverseResource(resource);      break;
+      case INTERNAL_POLL: handler.internalPollResource(resource); break;
+      default: break;
+      //checkstyle:OneStatementPerLine ON
+    }
+  }
+ 
   @Override
   public boolean accepts(Resource resource) {
     return resource.getPath().matches(pattern);

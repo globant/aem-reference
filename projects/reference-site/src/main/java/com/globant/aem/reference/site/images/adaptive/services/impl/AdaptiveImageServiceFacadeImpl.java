@@ -20,40 +20,47 @@ import com.globant.aem.reference.site.images.adaptive.services.AdaptiveImageServ
 
 @Component
 @Service
-@References({ @Reference(cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC, referenceInterface = AdaptiveImageService.class, name = "AdaptiveImageService") })
+@References({ 
+  @Reference(
+    cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, 
+    policy = ReferencePolicy.DYNAMIC, 
+    referenceInterface = AdaptiveImageService.class, 
+    name = "AdaptiveImageService") })
 public class AdaptiveImageServiceFacadeImpl implements AdaptiveImageServiceFacade {
+  private final Map<String, ServiceReference> adaptiveImageServiceConfigs = 
+      new HashMap<String, ServiceReference>();
+  
+  private final List<String> adaptiveImageServicePatterns = new Vector<String>();
 
-    private final Map<String, ServiceReference> adaptiveImageServiceConfigs = new HashMap<String, ServiceReference>();
-    private final List<String> adaptiveImageServicePatterns = new Vector<String>();
+  @Override
+  public AdaptiveImageService getServiceReference(String requestPath) {
 
-    @Override
-    public AdaptiveImageService getServiceReference(String requestPath) {
-
-        for (String pattern : adaptiveImageServicePatterns) {
-            if (Pattern.matches(pattern, requestPath)) {
-                ServiceReference config = adaptiveImageServiceConfigs.get(pattern);
-                if (config == null)
-                    continue;
-                return (AdaptiveImageService) config.getBundle().getBundleContext().getService(config);
-            }
+    for (String pattern : adaptiveImageServicePatterns) {
+      if (Pattern.matches(pattern, requestPath)) {
+        ServiceReference config = adaptiveImageServiceConfigs.get(pattern);
+        if (config == null) {
+          continue;
         }
-        return null;
+        return (AdaptiveImageService) config.getBundle().getBundleContext().getService(config);
+      }
     }
+    return null;
+  }
 
-    protected void bindAdaptiveImageService(ServiceReference ref) {
-        String sectionRegex = (String) ref.getProperty(AdaptiveImageServiceImpl.PROPERTY_SECTION);
-        adaptiveImageServiceConfigs.put(sectionRegex, ref);
-        adaptiveImageServicePatterns.add(sectionRegex);
-    }
+  protected void bindAdaptiveImageService(ServiceReference ref) {
+    String sectionRegex = (String) ref.getProperty(AdaptiveImageServiceImpl.PROPERTY_SECTION);
+    adaptiveImageServiceConfigs.put(sectionRegex, ref);
+    adaptiveImageServicePatterns.add(sectionRegex);
+  }
 
-    protected void unbindAdaptiveImageService(ServiceReference ref) {
-        String sectionRegex = (String) ref.getProperty(AdaptiveImageServiceImpl.PROPERTY_SECTION);
-        adaptiveImageServiceConfigs.remove(sectionRegex);
-        for (Iterator<String> iterator = adaptiveImageServicePatterns.iterator(); iterator.hasNext();) {
-            String pattern = iterator.next();
-            if (pattern.equals(sectionRegex)) {
-                iterator.remove();
-            }
-        }
+  protected void unbindAdaptiveImageService(ServiceReference ref) {
+    String sectionRegex = (String) ref.getProperty(AdaptiveImageServiceImpl.PROPERTY_SECTION);
+    adaptiveImageServiceConfigs.remove(sectionRegex);
+    for (Iterator<String> iterator = adaptiveImageServicePatterns.iterator(); iterator.hasNext();) {
+      String pattern = iterator.next();
+      if (pattern.equals(sectionRegex)) {
+        iterator.remove();
+      }
     }
+  }
 }

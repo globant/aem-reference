@@ -20,73 +20,61 @@ import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 
 import com.globant.aem.reference.site.images.adaptive.services.AdaptiveImageServiceFacade;
 
+@SuppressWarnings("serial")
 @Component(immediate = true, metatype = true, label = "Croppings Storage Servlet")
 @Service
 @Properties({
-        @Property(name = "sling.servlet.paths", value = { "/bin/services/core/public/setcroppings" }),
-        @Property(name = "sling.servlet.methods", value = { "GET" }) })
+  @Property(name = "sling.servlet.paths", value = { "/bin/services/core/public/setcroppings" }),
+  @Property(name = "sling.servlet.methods", value = { "GET" }) })
 public class SetCroppings extends SlingSafeMethodsServlet {
+  @Reference
+  private AdaptiveImageServiceFacade serviceFacade;
 
-    /**
-     * Serial Version ID
-     */
-    private static final long serialVersionUID = 1331999881285118556L;
+  @Override
+  protected void doGet(SlingHttpServletRequest request, final SlingHttpServletResponse response)
+      throws ServletException, IOException {
 
-    @Reference
-    private AdaptiveImageServiceFacade serviceFacade;
+    String path = request.getParameter("path");
 
-    @Override
-    protected void doGet(SlingHttpServletRequest request,
-            final SlingHttpServletResponse response) throws ServletException,
-            IOException {
+    ResourceResolver resourceResolver = request.getResourceResolver();
+    Resource imageResource = resourceResolver.resolve(path);
 
-        String path = request.getParameter("path");
+    Resource contentResource = imageResource.getChild("jcr:content");
+    Resource croppingsResource = imageResource.getChild("jcr:content/croppings");
 
-        ResourceResolver resourceResolver = request.getResourceResolver();
-        Resource imageResource = resourceResolver.resolve(path);
-
-        Resource contentResource = imageResource.getChild("jcr:content");
-        Resource croppingsResource = imageResource
-                .getChild("jcr:content/croppings");
-
-        if (croppingsResource == null) {
-            croppingsResource = resourceResolver.create(contentResource,
-                    "croppings", null);
-        }
-
-        Enumeration<?> names = request.getParameterNames();
-        while (names.hasMoreElements()) {
-            String name = (String) names.nextElement();
-            if (!name.equalsIgnoreCase("path")) {
-                String cords = request.getParameter(name);
-                String[] parts = cords.split("/");
-
-                if (parts.length == 2) {
-                    String[] rect = parts[0].split(",");
-                    if (rect.length == 4) {
-
-                        name = name.toLowerCase();
-                        Resource croppingIdResource = croppingsResource
-                                .getChild(name);
-                        if (croppingIdResource == null) {
-                            croppingIdResource = resourceResolver.create(
-                                    croppingsResource, name, null);
-                        }
-                        ModifiableValueMap properties = croppingIdResource
-                                .adaptTo(ModifiableValueMap.class);
-                        properties.put("x", rect[0]);
-                        properties.put("y", rect[1]);
-                        properties.put("w", rect[2]);
-                        properties.put("h", rect[3]);
-                    }
-                }
-            }
-
-            ModifiableValueMap properties = contentResource
-                    .adaptTo(ModifiableValueMap.class);
-            properties.put("jcr:lastModified", Calendar.getInstance());
-            
-            resourceResolver.commit();
-        }
+    if (croppingsResource == null) {
+      croppingsResource = resourceResolver.create(contentResource, "croppings", null);
     }
+
+    Enumeration<?> names = request.getParameterNames();
+    while (names.hasMoreElements()) {
+      String name = (String) names.nextElement();
+      if (!name.equalsIgnoreCase("path")) {
+        String cords = request.getParameter(name);
+        String[] parts = cords.split("/");
+
+        if (parts.length == 2) {
+          String[] rect = parts[0].split(",");
+          if (rect.length == 4) {
+
+            name = name.toLowerCase();
+            Resource croppingIdResource = croppingsResource.getChild(name);
+            if (croppingIdResource == null) {
+              croppingIdResource = resourceResolver.create(croppingsResource, name, null);
+            }
+            ModifiableValueMap properties = croppingIdResource.adaptTo(ModifiableValueMap.class);
+            properties.put("x", rect[0]);
+            properties.put("y", rect[1]);
+            properties.put("w", rect[2]);
+            properties.put("h", rect[3]);
+          }
+        }
+      }
+
+      ModifiableValueMap properties = contentResource.adaptTo(ModifiableValueMap.class);
+      properties.put("jcr:lastModified", Calendar.getInstance());
+
+      resourceResolver.commit();
+    }
+  }
 }

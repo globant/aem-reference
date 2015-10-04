@@ -16,6 +16,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +32,7 @@ import com.globant.aem.reference.site.replication.services.ReplicationCommand;
   metatype = false,
   immediate = true,
   description = "Handles com/day/cq/replication events by delegating to accepting instances of "
-              + "com.globant.aem.reference.site.replication.services.ReplicationCommand"
-)
+              + "com.globant.aem.reference.site.replication.services.ReplicationCommand")
 @Service(value = { EventHandler.class })
 @Property(name = "event.topics", value = { ReplicationAction.EVENT_TOPIC })
 @References({
@@ -41,8 +41,7 @@ import com.globant.aem.reference.site.replication.services.ReplicationCommand;
     policy = ReferencePolicy.DYNAMIC,
     referenceInterface = ReplicationCommand.class,
     bind = "bindReplicationCommand",
-    unbind = "unbindReplicationCommand")
-})
+    unbind = "unbindReplicationCommand") })
 public class ReplicationEventDispatcher implements EventHandler {
   private static final Logger log = LoggerFactory.getLogger(ReplicationEventDispatcher.class);
 
@@ -51,15 +50,21 @@ public class ReplicationEventDispatcher implements EventHandler {
 
   private List<ReplicationCommand> commands = new ArrayList<ReplicationCommand>();
 
-	public void handleEvent(Event event) {
-		ReplicationAction action = ReplicationAction.fromEvent(event);
+  /**
+   * Called by the {@link EventAdmin} service to notify the listener of an
+   * event.
+   * 
+   * @param event The event that occurred.
+   */
+  public void handleEvent(Event event) {
+    ReplicationAction action = ReplicationAction.fromEvent(event);
 
-		if(action != null) {
-		  String path = action.getPath();
-		  try {
+    if (action != null) {
+      String path = action.getPath();
+      try {
         Resource resource = this.resolve(path);
 
-        for(ReplicationCommand command: this.commands) {
+        for (ReplicationCommand command: this.commands) {
           if (command.accepts(resource)) {
             command.execute(action, resource);
           }
@@ -68,10 +73,10 @@ public class ReplicationEventDispatcher implements EventHandler {
       } catch (LoginException e) {
         log.error("Exception found when trying to access resource {}. Skipping resource.", path, e);
       }
-		} else {
-		  log.debug("Can't create a ReplicationAction from event {}", event.getTopic());
-		}
-	}
+    } else {
+      log.debug("Can't create a ReplicationAction from event {}", event.getTopic());
+    }
+  }
 
   private Resource resolve(String path) throws LoginException {
     ResourceResolver resourceResolver = resolverFactory.getAdministrativeResourceResolver(null);

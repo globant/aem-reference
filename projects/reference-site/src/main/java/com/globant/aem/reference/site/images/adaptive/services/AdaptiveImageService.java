@@ -3,75 +3,68 @@ package com.globant.aem.reference.site.images.adaptive.services;
 import java.util.List;
 
 public interface AdaptiveImageService {
-    
-    String FORMAT_WIDTH = "width:";
-    String FORMAT_MEDIA = "media:";
-    String FORMAT_PIXEL_DENSITY = "pixel-density:";
 
-    /**
-     * Returns the section of the repository in which these settings should be applied
-     * @return
-     */
-    String getSection();
+  String FORMAT_WIDTH = "width:";
+  String FORMAT_MEDIA = "media:";
+  String FORMAT_PIXEL_DENSITY = "pixel-density:";
 
-    /**
-     * True if the compression is enabled
-     * @return
-     */
-    Boolean getCompressionEnabled();
+  /**
+   * Returns the section of the repository in which these settings should be applied.
+   */
+  String getSection();
 
-    /**
-     * Compression factor for this section of the repository.
-     * @return
-     */
-    Float getCompressionFactor();
+  /**
+   * True if the compression is enabled.
+   */
+  Boolean getCompressionEnabled();
 
-    /**
-     * Returns the array of available widths in a plain string compatible with javascript.
-     * @return
-     */
-    String getAllowedWidthsString();
+  /**
+   * Compression factor for this section of the repository.
+   */
+  Float getCompressionFactor();
 
-    /**
-     * Returns the list of available widths in this section of the repository
-     * @return
-     */
-    List<String> getAllowedWidthsArray();
+  /**
+   * Returns the array of available widths in a plain string compatible with javascript.
+   */
+  String getAllowedWidthsString();
 
-    /**
-     * Returns the list of available croppings in this section of the repository
-     * @return
-     */
-    List<String> getAllowedCroppingsArray();
-    
-    /**
-     * Returns the list of supported images extension files
-     * @return
-     */
-    List<String> getSupportedImageTypes();
+  /**
+   * Returns the list of available widths in this section of the repository.
+   */
+  List<String> getAllowedWidthsArray();
 
-    List<Format> getSupportedFormats();
+  /**
+   * Returns the list of available croppings in this section of the repository.
+   */
+  List<String> getAllowedCroppingsArray();
 
-    boolean isMediaSet(List<Format> supportedFormats);
+  /**
+   * Returns the list of supported images extension files.
+   */
+  List<String> getSupportedImageTypes();
 
-    interface Format {
-        String getWidth();
+  List<Format> getSupportedFormats();
 
-        String getMedia();
+  boolean isMediaSet(List<Format> supportedFormats);
 
-        String[] getPixelDensity();
+  interface Format {
+    String getWidth();
 
-        String getFmt();
+    String getMedia();
 
-        void setFmt(String fmt);
+    String[] getPixelDensity();
 
-        void setWidth(String width);
+    String getFmt();
 
-        void setMedia(String media);
+    void setFmt(String fmt);
 
-        void setPixelDensity(String pixelDensity);
+    void setWidth(String width);
 
-        String getFormatValue(String format, String key);
-    }
+    void setMedia(String media);
+
+    void setPixelDensity(String pixelDensity);
+
+    String getFormatValue(String format, String key);
+  }
 
 }

@@ -12,27 +12,32 @@ import org.osgi.framework.BundleContext;
 import com.globant.aem.reference.site.images.adaptive.services.AdaptiveImageServiceGlobalConfig;
 
 @Service(value = AdaptiveImageServiceGlobalConfig.class)
-@Component(immediate = true, metatype = true, label = "Adaptive Image Service Global Config", description = "Provides Global Parameters for the Adaptive Image Service.")
-public class AdaptiveImageServiceGlobalConfigImpl implements
-        AdaptiveImageServiceGlobalConfig {
+@Component(
+  immediate = true, 
+  metatype = true, 
+  label = "Adaptive Image Service Global Config", 
+  description = "Provides Global Parameters for the Adaptive Image Service.")
+public class AdaptiveImageServiceGlobalConfigImpl implements AdaptiveImageServiceGlobalConfig {
 
-    @Property(intValue = 10, label = "Allowed Concurrent Threads", description = "This is the maximum number of concurrent threads allowed for the service.")
-    public static final String PROPERTY_CONCURRENT_THREADS = "concurrent.threads";
+  @Property(
+    intValue = 10, 
+    label = "Allowed Concurrent Threads", 
+    description = "This is the maximum number of concurrent threads allowed for the service.")
+  public static final String PROPERTY_CONCURRENT_THREADS = "concurrent.threads";
 
-    private int concurrent_threads;
+  private int concurrentThreads;
 
-    @Activate
-    protected void activate(final BundleContext bundleContext,
-            final Map<String, Object> properties) {
-        configureService(properties);
-    }
+  @Activate
+  protected void activate(final BundleContext bundleContext, final Map<String, Object> properties) {
+    configureService(properties);
+  }
 
-    private void configureService(Map<String, Object> properties) {
-        concurrent_threads = PropertiesUtil.toInteger(properties.get(PROPERTY_CONCURRENT_THREADS), 10);
-    }
+  private void configureService(Map<String, Object> properties) {
+    concurrentThreads = PropertiesUtil.toInteger(properties.get(PROPERTY_CONCURRENT_THREADS), 10);
+  }
 
-    @Override
-    public int getConcurrentThreads() {
-        return this.concurrent_threads;
-    }
+  @Override
+  public int getConcurrentThreads() {
+    return this.concurrentThreads;
+  }
 }
