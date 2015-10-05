@@ -40,6 +40,7 @@ import com.globant.aem.reference.site.images.adaptive.services.AdaptiveImageServ
 import com.globant.aem.reference.site.images.adaptive.services.AdaptiveImageServiceFacade;
 import com.globant.aem.reference.site.images.adaptive.services.AdaptiveImageServiceGlobalConfig;
 
+@SuppressWarnings("serial")
 @SlingServlet(
   resourceTypes = "sling/servlet/default", 
   methods = "GET",
@@ -53,8 +54,6 @@ import com.globant.aem.reference.site.images.adaptive.services.AdaptiveImageServ
     @Property(name = "service.vendor", value = "Globant-Reference", propertyPrivate = false) })
 public class AdaptiveImageServlet extends AbstractImageServlet {
   private final Logger log = LoggerFactory.getLogger(this.getClass());
-
-  private static final long serialVersionUID = 3550347050814047028L;
 
   private static int concurrentThreads = 0;
 

@@ -1,0 +1,5 @@
+<FindBugsFilter>
+  <!-- Ignore serialization errors globally -->
+  <Match><Bug pattern="SE_NO_SERIALVERSIONID"/></Match>
+  <Match><Bug pattern="SE_BAD_FIELD"/></Match>
+</FindBugsFilter>

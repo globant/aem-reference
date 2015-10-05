@@ -2,6 +2,7 @@ apply plugin: 'findbugs'
 
 findbugs {
   toolVersion = '3.0.0'
+  excludeFilter = file("$projectDir/config/findbugs-exclude-filter.xml")
 }
 
 tasks.withType(FindBugs) {

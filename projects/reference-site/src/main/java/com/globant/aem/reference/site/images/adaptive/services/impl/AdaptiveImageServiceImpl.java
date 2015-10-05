@@ -183,7 +183,7 @@ public class AdaptiveImageServiceImpl implements AdaptiveImageService {
     return supportedImageTypes;
   }
 
-  public class ImplFormat implements AdaptiveImageService.Format {
+  public static class ImplFormat implements AdaptiveImageService.Format {
 
     String width;
     String media;
