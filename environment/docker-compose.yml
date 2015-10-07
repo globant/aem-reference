@@ -1,3 +1,12 @@
+elastic:
+  build: docker/elastic
+  environment:
+    - DNSDOCK_NAME=elastic
+    - DNSDOCK_IMAGE=search
+  ports:
+    - "8080:8080"
+  dns: 172.17.42.1
+
 dnsdock:
   # Setting up a dns container to resolve circular linking dependencies
   # Need to use version v1.10.0 unil this issue is solved : https://github.com/tonistiigi/dnsdock/issues/34
